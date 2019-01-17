@@ -8,6 +8,9 @@ void startupTasks() {
         RGB.control(true);
         RGB.brightness(5);
         RGB.control(false);
+
+        System.set(SYSTEM_CONFIG_SOFTAP_PREFIX, "hello");
+        System.set(SYSTEM_CONFIG_SOFTAP_SUFFIX, "world");
 }
 STARTUP(startupTasks());
 
@@ -21,6 +24,27 @@ void listAPs()
         }
 
         Serial.println();
+}
+
+void connectionStats()
+{
+  WiFiSignal sig = WiFi.RSSI();
+  int rssi = sig.rssi;
+  float strength = sig.getStrength();
+  float quality = sig.getQuality();
+
+  Serial.printlnf("[%s]: rssi: %d, strength: %1.2f, quality: %1.2f", WiFi.SSID(), rssi, strength, quality);
+}
+
+void testByteToString()
+{
+  const uint8_t myBytes[] = {0xff, 0x0d, 0x03};
+  char myBytesBuffer[255];
+  for (unsigned i=0; i < sizeof(myBytes); i++) {
+    snprintf(myBytesBuffer, sizeof(myBytesBuffer), "%s%02X", myBytesBuffer, myBytes[i]);
+  }
+
+  Serial.println(myBytesBuffer);
 }
 
 int toggleLed(const char* args) {
@@ -45,15 +69,25 @@ void setup() // Put setup code here to run once
         Particle.connect();
 }
 
+// [eduroam]: rssi: -69, strength: 62.00, quality: 45.16
+
 void loop() // Put code here to loop forever
 {
         // Don't print in listening mode
-        if (WiFi.listening() == false) {
-                static uint32_t msDelay = 0;
-                if (millis() - msDelay >= 5000) {
-                        listAPs();
-                        msDelay = millis();
-                }
+        if (WiFi.listening()) {
+                return;
         }
 
+        static uint32_t msDelay = 0;
+        if (millis() - msDelay >= 3000) {
+
+                if (WiFi.ready()) {
+                  connectionStats();
+                  //testByteToString();
+                } else {
+                    listAPs();
+                }
+
+                msDelay = millis();
+        }
 }
