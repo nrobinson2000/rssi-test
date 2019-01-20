@@ -11,7 +11,7 @@ targets:
     sh: false
     args:
       - photon
-      - build
+      - build-beta
     cmd: po
     keymap: ctrl-alt-1
     name: Build
@@ -20,7 +20,7 @@ targets:
     sh: false
     args:
       - photon
-      - flash
+      - flash-beta
     cmd: po
     keymap: ctrl-alt-2
     name: Flash
@@ -29,7 +29,7 @@ targets:
     sh: false
     args:
       - photon
-      - clean
+      - clean-beta
     cmd: po
     keymap: ctrl-alt-3
     name: Clean
