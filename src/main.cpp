@@ -1,7 +1,11 @@
-#include "Particle.h"
+#include "JsonParserGeneratorRK.h"
 
 SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED);
+
+// Libraries
+TCPClient client;
+JsonParser parser;
 
 // Cloud Variables Global
 
@@ -79,6 +83,16 @@ void blink() {
         digitalWrite(D0, ledState);
 }
 
+bool hasIP = false;
+char myIp[200];
+
+void ipHandler(const char *topic, const char *data) {
+    Serial.println("received " + String(topic) + ": " + String(data));
+    snprintf(myIp, sizeof(myIp), "%s", data);
+    hasIP = true;
+}
+
+
 void setup() // Put setup code here to run once
 {
         // Button and LED
@@ -99,6 +113,9 @@ void setup() // Put setup code here to run once
         // Cloud Function Definitions
         Particle.function("toggle", toggleLed);
 
+        // Subscriptions
+        Particle.subscribe("particle/device/ip", ipHandler, MY_DEVICES);
+
         // Attempt Particle Connection
         Particle.connect();
 }
@@ -117,6 +134,11 @@ void loop() // Put code here to loop forever
 
                 if (WiFi.ready()) {
                         updateConnectionStats();
+
+                        if (!hasIP) {
+                          Particle.publish("particle/device/ip", PRIVATE);
+                        }
+
                         //testByteToString();
                 } else {
                         listAPs();
